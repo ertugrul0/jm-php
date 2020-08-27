@@ -1,0 +1,3 @@
+<?php
+// OFFSET LIMIT ORDER BY 
+// SELECT * FROM artiles ORDER BY name LIMIT 3 OFFSET 3;

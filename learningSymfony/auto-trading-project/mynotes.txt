@@ -1,0 +1,256 @@
+> php bin/console server:run
+php bin/console generate:bundle
+choose one of them: shared bundle or application bundle
+
+==
+(autoload failed : composer dump-autoload command is used to fix it.)
+composer.json file is changed to see all /src directory
+==
+What is bundle? As in the tutorialspoint.com stated:
+A Symfony bundle is a collection of files and folders organized in a specific structure. The bundles are modeled in such a way that it can be reused in multiple applications. The main application itself is packaged as a bundle and it is generally called AppBundle
+
+
+installing a third party bundle using composer
+ex: KnpMenuBundle, it allows to display navigation bar
+
+building own bundle and sharing it possible of course
+
+> composer require knplabs/knp-menu-bundle failed
+to solve memory limit error run the following:
+> COMPOSER_MEMORY_LIMIT=-1 composer require knplabs/knp-menu-bundle (worked)
+
+after the installation is done, you can see it in the vendor directory
+You need to register the bundle after the installation
+
+===
+default home page dsplayed just hello world
+by adding prefix in the routing.yaml file solved the problem
+-----------------------
+SECTION 4
+used bootstrap as a main theme by using CDN
+adding a bootstrap class to a menu child using builder class: nav-item
+defining a route in the comment: /our-cars named offer route
+blocks in the twig file and inheriting them and using parent() function
+
+twig comes automatically in symfony
+twig is compiled to a row php
+the compiled version is in the var/cache directory
+twig tags:
+    1- {% logic here %} => kind of execution: ex: if, else.
+    2- {{ expression or value }} => twig will output sth: ex: {{car.brandName}}
+    3- {# comment #} =>  comment in twig.
+go to twig panel and see statistics such as time to load a page etc.
+
+connect the view with controller
+we have created an array of cars in the default controller of the CarsBundle
+and we passed this data into the view.
+And in the view (twig file), we have got this data and show the cars in a table
+using for loop while using the twig syntax.
+----
+SECTION 5
+
+doctrine: let connect to db automatically and much more features
+is divided into 3 main packages:
+1- Common: contains reusable components that have no dependencies beyond the package itself.
+2- DBAL: contains an enhanced database abstraction layer on top of PDO but is not strongly bound to PDO
+3- ORM: contains the object-relational mapping toolkit that provides transparent relational persistence for plain php objects
+
+Entity Manager: is an object that manages all entities. 
+Entity: plain php objects that represents data. It is an object with identity. (a row in the database)
+Repository: it is a class connected with the entity. There is no need to define a Repository for an entity.
+Doctrine does it for you such as: findAll, findById etc. If you need a custom method for more logic, you will
+have to define a custom Repository.
+
+cons of doctrine:
+- slow for complex data structures => lazy loading and custom sql queries to overcome this.
+- slow for batch processing
+- some db specific functions not available
+
+* We maps the database structure to objects using orm: object relational model.
+
+installed mysql on mac and set credentials for root
+> bin/console doctrine:database:create
+command created the database named autotrader
+see parameters.yaml file for more information.
+see config.yaml file also.
+> bin/console doctrine:database:drop (--force)
+
+== generating an entity ==
+> bin/console doctrine:generate:entity
+you choose the bundle where the entity places in and you may add some fields and types in the command line.
+the entity folder and the class are automatically created.
+Note that car entity class does not make any inheritance.
+
+You can see the table name in Car.php entity file: table name: car in this case.
+
+
+> bin/console doctrine:schema:update (--force)
+command is executed to update database schema.
+Also, a default entity Repository is created: In this case: CarRepostitory
+
+I have used CarRepostitory and findAll method and displayed all cars in the database.
+I have got all data from database
+changed DefaultController by adding a new route to see details of a car. named route is /car: show_car
+changed Car entity by adding a description and use the update command above to reflect changes in database
+I have learned how to pass variable from page to page.
+I have learned how to navigate between pages using a href html element.
+
+> bin/console doctrine:generate:entities CarBundle
+this command above will generate all getters and setters in the Car entity if not exists.
+Also a backup created. Do not forget to update schema command to reflect the changes in the database.
+
+used data types: int, date(int), bool(tinyint), float, string
+
+-----
+
+Creating an entity with the parameters from the command line:
+> bin/console doctrine:generate:entity --entity='CarBundle:Make' --fields='name:string(255)'
+
+Creating an entity with parameters from the command line, with no any interaction:
+> bin/console doctrine:generate:entity --entity='CarBundle:Model' --fields='name:string(255)' --no-interaction
+
+I have learned how to define OneToMany and ManyToOne relations in the Entity class.
+Doctrine uses ArrayCollection instead of Arrays by default.
+After the change of files, the following command is executed:
+> bin/console doctrine:generate:entities CarBundle 
+Note that a constructor method is also added since doctrine needs to initialize ArrayCollection variable: $cars in this case.
+
+To reflect the changes in the database, do not forget to execute following command:
+> bin/console doctrine:schema:update --force
+---------
+Lazy loading: is a technique that doctrine uses to fetch the data.
+Doctrine gets data from database only when asked and needed.
+Relation objects are replaced by proxy objects (like mock data). When try to access
+these files, doctrine runs a new query and replaces the mock object with the real one.
+---------
+Query Profiling (Creating custom queries with join clause):
+using queryBuilder, we can write custom queries (join for example) in CarRepostitory.
+In the DefaultController, use the custom queries here. 
+instead of 4 queries in one page, we had only one query by using them.
+-----------
+SECTION 6: Form Basics
+
+In default controller, I created a form using formBuilder and pass it as a parameter to the render function
+Since we are passing the form parameter, we can get the form in the twig view.
+In the config.yaml file, I changed the form theme in the twig section.
+
+After arranging the form, I have learned how to submit the form. Using Request in the indexAction
+And also I have learned how to validate that data and associate the request with the form.
+Validation erros are also displayed in the view file.
+
+Up to this point, we have created the form using the default controller. Which is not the best way.
+I have created a form entity for this.
+> bin/console generate:doctrine:form CarBundle:Make
+
+Handle CRUD for an entity:
+> bin/console generate:doctrine:crud --entity=CarBundle:Car --format=annotation --with-write --no-interaction
+Above command has done the followings:
+
+- CarType Form is created.
+- CarController.php is created.
+- In the app resources views file, by default twig files are located here.
+- I have moved into the CarBundle Resources views file.
+** When you change view location, you need to update controller as well.
+I have used @Template() annotation, it will do the match the functions with the views automatically.
+** If you want to convert your entity to a string, you need to implement __toString() method (like __str__).
+I have learned how to prepare a model for a form by doing the above implementations.
+-----
+Customize the form and adding a Validation
+
+I have learned how to customize generated controller, views etc.
+===========
+SECTION 7: Service Container
+
+Defining a service many places. But if you define a service related to the bundle, you are suggested to
+define it in the related bundle folder.
+then configure the file named services.yml.
+
+we have used the service in the controller
+
+I have learned how to pass a parameter to service: service.yaml file and parameters.yaml (parameters.yaml.dist also) file is configured.
+
+--
+how to depend on another service?
+added dataChecker Service and use it.
+---------------
+SECTION 8: Console Commands
+generating a command:
+> bin/console generate:command
+see the command folder in the bundle.
+--
+I have learned how to access a service Container in the console command.
+I have listed cars in the command line by running below:
+> bin/console abc:check-cars
+And that command is created by the above command: > bin/console generate:command.
+--
+Command Progress:
+
+How to use arguments in the command: format in this case. You can run ex:
+> bin/console abc:check-cars -verbose
+-verbose: a built in format.
+--
+How to define a console command as a service?
+inherit from Command class instead of ContainerAwareCommand
+use protected variables for other services such as entityManager and write a constructor
+add service configuration file the details
+add tags for the console command: name: console.command
+========
+SECTION 9: test the application using PHPUnit
+-----
+add php unit require-dev section on the composer.json file.
+
+to install phpunit, run the following command:
+> composer update (failed)
+> COMPOSER_MEMORY_LIMIT=-1 composer update (worked.)
+
+you can see phpunit in the vendor directory.
+also check the version:
+> vendor/bin/phpunit --v.
+-----
+To run the tests, run the following command:
+> vendor/bin/phpunit
+-----
+Code Coverage Report:
+Adding  <logging> to phpunit.xml.dist file and run the test again:
+> vendor/bin/phpunit
+
+check logs for the result and the report.
+-----
+unit testing:
+I have created a simple class for testing named DataCheckerTest.php file under Tests folder of the Carbundle file.
+Created mock data and done.
+----
+functional testing:
+making a request and check the h1 content for example is tested by using phpunit.
+==========
+SECTION 10
+----
+Configure fixtures:
+adding "doctrine/doctrine-fixtures-bundle": "^2.4.1" in the composer.json file and update it.
+then register the bundle in the AppKernel.php file by adding:  new \Doctrine\Bundle\FixturesBundle\DoctrineFixturesBundle(), line.
+Then type > bin/console and you see the output: doctrine:fixtures:load.
+That means we have the fixture installed and configured.
+---
+load some data:
+created LoadDictionary class and  implemented the load method.
+run:
+> bin/console doctrine:fixtures:load 
+to load data
+or
+> > bin/console doctrine:fixtures:load --append 
+not to purge the old data but just append data.
+
+load also cars which have a reference from other doctrine entity.
+I have also learned the order the load. using getOrder function by implementing OrderedFixtureInterface.
+
+
+
+
+
+
+
+
+
+
+
+
